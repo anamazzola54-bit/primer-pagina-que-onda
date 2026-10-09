@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA — Haute Parfumerie</title>
+    <!-- Tailwind CSS para diseño pro -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
+        
+        .font-serif-luxury { font-family: 'Cinzel', serif; }
+        .font-sans-luxury { font-family: 'Montserrat', sans-serif; }
+        
+        .gold-gradient {
+            background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .bg-gold-gradient {
+            background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 50%, #aa771c 100%);
+        }
+        .gold-border {
+            border-image: linear-gradient(to right, #bf953f, #fcf6ba, #aa771c) 1;
+        }
+    </style>
+</head>
+<body class="bg-neutral-950 text-neutral-100 font-sans-luxury antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- NAV BAR -->
+    <nav class="sticky top-0 z-40 bg-neutral-950/90 backdrop-blur-md border-b border-neutral-800">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-3xl font-serif-luxury tracking-widest gold-gradient font-bold">AURA</a>
+            
+            <div class="flex items-center gap-6">
+                <!-- Buscador -->
+                <div class="relative hidden sm:block">
+                    <input type="text" id="searchInput" oninput="renderProducts()" placeholder="Buscar perfume..." 
+                           class="bg-neutral-900 border border-neutral-700 rounded-full px-4 py-1.5 pl-10 text-xs focus:outline-none focus:border-amber-500 w-48 transition-all">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2 text-neutral-400"></i>
+                </div>
+
+                <!-- Botón Panel Vendedor -->
+                <button onclick="toggleAdminPanel()" class="flex items-center gap-2 text-xs uppercase tracking-wider text-amber-400 hover:text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 transition">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    <span class="hidden md:inline">Modo Vendedor</span>
+                </button>
+
+                <!-- Carrito -->
+                <button onclick="toggleCart()" class="relative p-2 text-neutral-300 hover:text-amber-400 transition">
+                    <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                    <span id="cartCount" class="absolute -top-1 -right-1 bg-amber-500 text-neutral-950 font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="relative bg-neutral-900 py-20 px-6 text-center border-b border-neutral-800 overflow-hidden">
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#bf953f_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div class="relative max-w-3xl mx-auto space-y-4">
+            <span class="text-xs uppercase tracking-[0.3em] text-amber-400 font-semibold">Colección Exclusiva 2026</span>
+            <h1 class="text-4xl md:text-6xl font-serif-luxury font-bold tracking-tight text-neutral-100">La Esencia del Lujo</h1>
+            <p class="text-neutral-400 text-sm md:text-base font-light max-w-xl mx-auto">
+                Fragancias de alta perfumería elaboradas con los extractos más exóticos y exclusivos del mundo.
+            </p>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT / PRODUCTOS -->
+    <main class="max-w-7xl mx-auto px-6 py-12 flex-grow w-full">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl md:text-2xl font-serif-luxury tracking-wide text-neutral-200">Catálogo de Fragancias</h2>
+            <span id="productCounter" class="text-xs text-neutral-500 uppercase tracking-widest">0 Productos</span>
+        </div>
+
+        <!-- Grid de Productos -->
+        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Cargado por JavaScript -->
+        </div>
+    </main>
+
+    <!-- MODAL / PANEL DE ADMINISTRADOR (VENDEDOR) -->
+    <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-neutral-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-6 relative">
+            <button onclick="toggleAdminPanel()" class="absolute top-4 right-4 text-neutral-400 hover:text-white">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div>
+                <h3 class="text-xl font-serif-luxury text-amber-400 flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i> Panel de Administración
+                </h3>
+                <p class="text-xs text-neutral-400 mt-1">Cargá nuevos productos a la tienda en tiempo real.</p>
+            </div>
+
+            <form id="addProductForm" onsubmit="handleAddProduct(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-neutral-300 mb-1">Nombre del Perfume</label>
+                    <input type="text" id="prodName" required placeholder="Ej: Oud Royal" 
+                           class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-neutral-300 mb-1">Precio ($)</label>
+                        <input type="number" id="prodPrice" step="0.01" required placeholder="120.00" 
+                               class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-neutral-300 mb-1">Categoría</label>
+                        <input type="text" id="prodCategory" placeholder="Ej: Parfum / Unisex" 
+                               class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-neutral-300 mb-1">URL de la Imagen</label>
+                    <input type="url" id="prodImage" required placeholder="https://images.unsplash.com/..." 
+                           class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-neutral-300 mb-1">Descripción</label>
+                    <textarea id="prodDesc" rows="2" placeholder="Notas de salida, corazón y fondo..." 
+                              class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-gold-gradient text-neutral-950 font-bold py-2.5 rounded-lg text-sm hover:opacity-90 transition">
+                    Publicar Producto
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DRAWER DEL CARRITO -->
+    <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-neutral-900 border-l border-neutral-800 z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between p-6">
+        <div>
+            <div class="flex justify-between items-center border-b border-neutral-800 pb-4">
+                <h3 class="text-lg font-serif-luxury text-amber-400 flex items-center gap-2">
+                    <i data-lucide="shopping-bag" class="w-5 h-5"></i> Tu Carrito
+                </h3>
+                <button onclick="toggleCart()" class="text-neutral-400 hover:text-white">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div id="cartItems" class="py-4 space-y-4 max-h-[60vh] overflow-y-auto">
+                <!-- Se llena con JS -->
+            </div>
+        </div>
+
+        <div class="border-t border-neutral-800 pt-4 space-y-4">
+            <div class="flex justify-between text-base font-semibold">
+                <span>Total:</span>
+                <span id="cartTotal" class="text-amber-400">$0.00</span>
+            </div>
+            <button onclick="checkout()" class="w-full bg-gold-gradient text-neutral-950 font-bold py-3 rounded-lg text-sm hover:opacity-90 transition text-center block">
+                Finalizar Compra por WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-neutral-950 border-t border-neutral-800 py-8 text-center text-xs text-neutral-500 space-y-2">
+        <p class="font-serif-luxury tracking-widest text-neutral-400">AURA HAUTE PARFUMERIE © 2026</p>
+        <p>Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- LÓGICA JAVASCRIPT -->
+    <script>
+        // Productos Iniciales de Ejemplo
+        let initialProducts = [
+            {
+                id: 1,
+                name: "Noir Absolu",
+                category: "Eau de Parfum",
+                price: 185.00,
+                image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=600&q=80",
+                description: "Notas intensas de madera de Oud, rosa negra y ámbar especiado."
+            },
+            {
+                id: 2,
+                name: "Velvet Vanilla",
+                category: "Extrait de Parfum",
+                price: 140.00,
+                image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80",
+                description: "Vainilla Bourbon madurada, flores blancas y toque sutil de almizcle."
+            },
+            {
+                id: 3,
+                name: "Santal & Cèdre",
+                category: "Unisex Parfum",
+                price: 160.00,
+                image: "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?auto=format&fit=crop&w=600&q=80",
+                description: "Madera de sándalo picante, cedro del Atlas y cardamomo."
+            },
+            {
+                id: 4,
+                name: "Elixir D'Or",
+                category: "Edición Limitada",
+                price: 220.00,
+                image: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=600&q=80",
+                description: "Infusión de azafrán, jazmín de noche y resinas preciosas."
+            }
+        ];
+
+        // Cargar productos del LocalStorage o usar los iniciales
+        let products = JSON.parse(localStorage.getItem('aura_products')) || initialProducts;
+        let cart = [];
+
+        function saveProducts() {
+            localStorage.setItem('aura_products', JSON.stringify(products));
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            grid.innerHTML = '';
+
+            const filtered = products.filter(p => 
+                p.name.toLowerCase().includes(search) || 
+                p.description.toLowerCase().includes(search)
+            );
+
+            document.getElementById('productCounter').innerText = `${filtered.length} Productos`;
+
+            filtered.forEach(p => {
+                grid.innerHTML += `
+                    <div class="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden group hover:border-amber-500/50 transition duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="h-64 overflow-hidden relative">
+                                <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                <button onclick="deleteProduct(${p.id})" class="absolute top-3 right-3 bg-red-600/80 hover:bg-red-600 text-white p-1.5 rounded-full text-xs transition" title="Eliminar Producto (Modo Admin)">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <div class="p-5 space-y-2">
+                                <span class="text-[10px] uppercase tracking-widest text-amber-400 font-semibold">${p.category}</span>
+                                <h3 class="text-lg font-serif-luxury font-bold text-neutral-100">${p.name}</h3>
+                                <p class="text-neutral-400 text-xs line-clamp-2 font-light">${p.description}</p>
+                            </div>
+                        </div>
+                        <div class="p-5 pt-0 flex justify-between items-center mt-4">
+                            <span class="text-lg font-semibold text-neutral-100">$${p.price.toFixed(2)}</span>
+                            <button onclick="addToCart(${p.id})" class="bg-neutral-800 hover:bg-amber-500 hover:text-neutral-950 text-neutral-200 text-xs uppercase tracking-wider font-semibold px-4 py-2 rounded-lg transition">
+                                Agregar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function handleAddProduct(e) {
+            e.preventDefault();
+            const newProd = {
+                id: Date.now(),
+                name: document.getElementById('prodName').value,
+                price: parseFloat(document.getElementById('prodPrice').value),
+                category: document.getElementById('prodCategory').value || 'Parfum',
+                image: document.getElementById('prodImage').value,
+                description: document.getElementById('prodDesc').value
+            };
+
+            products.unshift(newProd);
+            saveProducts();
+            renderProducts();
+            toggleAdminPanel();
+            document.getElementById('addProductForm').reset();
+        }
+
+        function deleteProduct(id) {
+            if (confirm("¿Estás seguro de que querés eliminar este perfume del catálogo?")) {
+                products = products.filter(p => p.id !== id);
+                saveProducts();
+                renderProducts();
+            }
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            updateCart();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        function updateCart() {
+            document.getElementById('cartCount').innerText = cart.length;
+            const container = document.getElementById('cartItems');
+            container.innerHTML = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                total += item.price;
+                container.innerHTML += `
+                    <div class="flex items-center justify-between bg-neutral-950 p-3 rounded-lg border border-neutral-800">
+                        <div class="flex items-center gap-3">
+                            <img src="${item.image}" class="w-12 h-12 object-cover rounded">
+                            <div>
+                                <h4 class="text-xs font-semibold font-serif-luxury">${item.name}</h4>
+                                <span class="text-xs text-amber-400">$${item.price.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <button onclick="removeFromCart(${index})" class="text-neutral-500 hover:text-red-400">
+                            <i data-lucide="trash" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+            });
+
+            document.getElementById('cartTotal').innerText = `$${total.toFixed(2)}`;
+            lucide.createIcons();
+        }
+
+        function toggleAdminPanel() {
+            document.getElementById('adminModal').classList.toggle('hidden');
+        }
+
+        function toggleCart() {
+            document.getElementById('cartDrawer').classList.toggle('translate-x-full');
+        }
+
+        function checkout() {
+            if (cart.length === 0) return alert("El carrito está vacío");
+            let msg = "Hola! Quisiera realizar un pedido en AURA:\n\n";
+            cart.forEach(item => {
+                msg += `- ${item.name} ($${item.price})\n`;
+            });
+            const total = cart.reduce((acc, i) => acc + i.price, 0);
+            msg += `\nTotal: $${total.toFixed(2)}`;
+            
+            // Reemplazar con tu número de teléfono de WhatsApp si querés (ej: 54911xxxxxxxx)
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // Inicializar
+        renderProducts();
+        lucide.createIcons();
+    </script>
+</body>
+</html>
